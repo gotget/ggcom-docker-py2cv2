@@ -1,4 +1,4 @@
-# GGCOM - Docker - py2cv2 v201508051237
+# GGCOM - Docker - py2cv2 v201508060524
 # Louis T. Getterman IV (@LTGIV)
 # www.GotGetLLC.com | www.opensour.cc/ggcom/docker/py2cv2
 #
@@ -15,6 +15,15 @@
 #
 # Setting up pyenv in docker
 # https://gist.github.com/jprjr/7667947
+#
+# PyImageSearch
+# http://pyimagesearch.com/
+#
+# Script to install Python scientific stack ("Scipy Superpack")
+# https://gist.github.com/fonnesbeck/cb3546fd45cb516eaa6b
+#
+# SimpleCV
+# https://github.com/sightmachine/simplecv#installation
 #
 ################################################################################
 FROM		ubuntu:14.04.2
@@ -57,13 +66,14 @@ ENTRYPOINT ["python"]
 ################################################################################
 USER		root
 
-# Install Python analytics requirements
+# Install Python analytics and "ScipySuperpack" requirements
 RUN			apt-get -y install \
 				build-essential \
 				gfortran \
 				libatlas-dev \
 				libatlas3-base \
 				libfreetype6-dev \
+				libhdf5-dev \
 				liblapack-dev \
 				libopenblas-dev \
 				libpng12-dev \
@@ -73,6 +83,8 @@ RUN			apt-get -y install \
 ################################################################################
 USER		python_user
 
+# Install Python analytics
+RUN			pip install six
 RUN			pip install numpy
 RUN			pip install scipy
 RUN			pip install matplotlib
@@ -83,6 +95,36 @@ RUN			pip install scikit-learn
 RUN			pip install scikit-image
 RUN			pip install mahotas
 RUN			pip install zbar
+
+# Install ScipySuperpack (see page 7 of "Practical Python and OpenCV")
+RUN			pip install sympy
+RUN			pip install patsy
+RUN			pip install pygments
+RUN			pip install sphinx
+RUN			pip install cython
+RUN			pip install jinja2
+RUN			pip install tornado
+RUN			pip install pyzmq
+RUN			pip install statsmodels
+RUN			pip install Theano
+RUN			pip install pymc
+RUN			pip install nose
+
+# Install additional libraries (see page 10 of "Image Search Engine Resource Guide")
+RUN			pip install h5py
+RUN			pip install pprocess
+
+# Install MQTT client capabilities - since ScipySuperpack dumps in ZeroMQ client capabilities
+RUN			pip install mosquitto
+
+# To-do: Install SimpleCV? (see page 9 of "Image Search Engine Resource Guide")
+# https://github.com/sightmachine/simplecv#installation - states that they have their own Docker image.
+# "WARNING: Using docker does not allow the webcam to work, it also doesn't work with Image.show(),"
+# "so essentially requires you to use simplecv within an IPython notebook."
+# RUN			pip install https://github.com/sightmachine/SimpleCV/zipball/develop
+
+# To-do: Install ilastik? (see page 10 of "Image Search Engine Resource Guide")
+# Note: ilastik seems to use yapsy.
 ################################################################################
 USER		root
 
@@ -119,9 +161,9 @@ RUN			cmake \
 				-D CMAKE_BUILD_TYPE=RELEASE \
 				-D CMAKE_INSTALL_PREFIX="$HOME/usr/local" \
 				-D BUILD_NEW_PYTHON_SUPPORT=ON \
-				-D INSTALL_C_EXAMPLES=ON \
-				-D INSTALL_PYTHON_EXAMPLES=ON \
-				-D BUILD_EXAMPLES=ON \
+				-D INSTALL_C_EXAMPLES=OFF \
+				-D INSTALL_PYTHON_EXAMPLES=OFF \
+				-D BUILD_EXAMPLES=OFF \
 				..
 
 # Install OpenCV
